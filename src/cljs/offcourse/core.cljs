@@ -21,6 +21,11 @@
 (def SidebarPushable (r/adapt-react-class (.-Pushable JSSidebar)))
 (def SidebarPusher   (r/adapt-react-class (.-Pusher JSSidebar)))
 
+(def JSAccordion      (.-Accordion js/semanticUIReact))
+(def Accordion        (r/adapt-react-class JSAccordion))
+(def AccordionTitle   (r/adapt-react-class (.-Title JSAccordion)))
+(def AccordionContent (r/adapt-react-class (.-Content JSAccordion)))
+
 (def visible? (r/atom false))
 
 (defn CourseCard [title]
@@ -28,11 +33,21 @@
    [CardContent
     [CardHeader title]]
    [CardContent {:extra true}
-    [:div.ui.two.buttons
-     [Button {:basic true
-              :color "green"} "Approve"]
-     [Button {:basic true
-              :color "red"} "Decline"]]]])
+    [Accordion
+     [AccordionTitle "Burggg..."]
+     [AccordionContent
+      [:div.ui.two.buttons
+       [Button {:basic true
+                :color "green"} "Approve"]
+       [Button {:basic true
+                :color "red"} "Decline"]]]
+     [AccordionTitle "Burggg..."]
+     [AccordionContent
+      [:div.ui.two.buttons
+       [Button {:basic true
+                :color "green"} "Approve"]
+       [Button {:basic true
+                :color "red"} "Decline"]]]]]])
 
 (defn simple-component []
   [SidebarPushable {:as JSSegment}
