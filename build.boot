@@ -15,9 +15,10 @@
                  [metosin/ring-http-response    "0.8.0"]
                  [org.clojure/clojurescript     "1.9.293"]
                  [reagent                       "0.6.0"]
-                 [cljsjs/semantic-ui-react      "0.64.0-0"]
+                 [cljs-ajax                     "0.5.8"]
                  [compojure                     "1.6.0-beta1"]
-                 [hiccup                        "1.0.5"]])
+                 [hiccup                        "1.0.5"]
+                 [cljsjs/semantic-ui-react      "0.64.0-0"]])
 
 (require
  '[adzerk.boot-cljs              :refer [cljs]]

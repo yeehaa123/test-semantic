@@ -1,75 +1,44 @@
 (ns offcourse.core
   (:require [reagent.core :as r]
-            [cljsjs.semantic-ui-react]))
+            [ajax.core :refer [GET]]
+            [offcourse.semantic :refer [Container Accordion Header
+                                        AccordionTitle AccordionContent]]
+            [offcourse.layout :refer [Layout]]
+            [offcourse.sidebar :refer [Sidebar]]
+            [offcourse.course-card :refer [CourseCard]]))
 
-(def Container   (r/adapt-react-class (.-Container js/semanticUIReact)))
-(def JSSegment (.-Segment js/semanticUIReact))
-(def Segment     (r/adapt-react-class (.-Segment js/semanticUIReact)))
-(def Header      (r/adapt-react-class (.-Header js/semanticUIReact)))
-(def Button      (r/adapt-react-class (.-Button js/semanticUIReact)))
+(defonce appstate (r/atom {:sidebar-visible? false}))
 
-(def JSMenu      (.-Menu js/semanticUIReact))
-(def Menu        (r/adapt-react-class (.-Menu js/semanticUIReact)))
-
-(def JSCard      (.-Card js/semanticUIReact))
-(def Card        (r/adapt-react-class JSCard))
-(def CardContent (r/adapt-react-class (.-Content JSCard)))
-(def CardHeader  (r/adapt-react-class (.-Header JSCard)))
-
-(def JSSidebar      (.-Sidebar js/semanticUIReact))
-(def Sidebar        (r/adapt-react-class JSSidebar))
-(def SidebarPushable (r/adapt-react-class (.-Pushable JSSidebar)))
-(def SidebarPusher   (r/adapt-react-class (.-Pusher JSSidebar)))
-
-(def JSAccordion      (.-Accordion js/semanticUIReact))
-(def Accordion        (r/adapt-react-class JSAccordion))
-(def AccordionTitle   (r/adapt-react-class (.-Title JSAccordion)))
-(def AccordionContent (r/adapt-react-class (.-Content JSAccordion)))
-
-(def visible? (r/atom false))
-
-(defn CourseCard [title]
-  [Card
-   [CardContent
-    [CardHeader title]]
-   [CardContent {:extra true}
-    [Accordion
-     [AccordionTitle "Burggg..."]
+(defn App [appstate]
+  [Layout appstate
+   [Sidebar appstate]
+   [Container
+    [Accordion {:default-active-index 1}
+     [AccordionTitle  [Header "Global"]]
      [AccordionContent
-      [:div.ui.two.buttons
-       [Button {:basic true
-                :color "green"} "Approve"]
-       [Button {:basic true
-                :color "red"} "Decline"]]]
-     [AccordionTitle "Burggg..."]
+      [:div.ui.cards.stackable.doubling
+       (map-indexed (fn [index title]
+                      (.log js/console title)
+                      ^{:key index} [CourseCard title]) {:services_info (:global @appstate)})]]
+     [AccordionTitle  [Header "Development"]]
      [AccordionContent
-      [:div.ui.two.buttons
-       [Button {:basic true
-                :color "green"} "Approve"]
-       [Button {:basic true
-                :color "red"} "Decline"]]]]]])
+      [:h1.ui.small.header "Landing Pages"]
+      [:div.ui.cards
+       (map-indexed (fn [index title]
+                      ^{:key index} [CourseCard title]) (:landing_pages (:development @appstate)))]]]]])
 
-(defn simple-component []
-  [SidebarPushable {:as JSSegment}
-   [Segment {:inverted true
-             :color :red}
-    [Container
-     [Header {:as :h1
-              :inverted true}
-      "Offcourse"]
-     [Button {:onClick #(swap! visible? not)}]]]
-   [Sidebar {:as JSMenu
-             :animation :overlay
-             :width "thin"
-             :direction "right"
-             :vertical true
-             :inverted true
-             :visible @visible?}]
-   [SidebarPusher
-    [Container
-     (map-indexed (fn [index title]
-                    ^{:key index} [CourseCard title]) ["Hello" "World"])]]])
+(GET "https://s3.amazonaws.com/offcourse-services-info-global/global.json"
+     {:handler #(swap! appstate assoc-in [:global] %)
+      :error-handler #(.log js/console %)
+      :response-format :json
+      :keywords? true})
+
+(GET "https://s3.amazonaws.com/offcourse-services-info-global/development.json"
+     {:handler #(swap! appstate assoc-in [:development] %)
+      :error-handler #(.log js/console %)
+      :response-format :json
+      :keywords? true})
 
 (defn render-simple []
-  (r/render-component [simple-component]
+  (r/render-component [App appstate]
                       (. js/document (querySelector "#container"))))
